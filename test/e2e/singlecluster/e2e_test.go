@@ -17,6 +17,8 @@ limitations under the License.
 package e2e
 
 import (
+	"time"
+
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
@@ -353,13 +355,18 @@ var _ = ginkgo.Describe("Kueue", func() {
 			gomega.Expect(k8sClient.Create(ctx, localQueue)).Should(gomega.Succeed())
 		})
 		ginkgo.AfterEach(func() {
+			waitForAvailableStart := time.Now()
+			ginkgo.GinkgoLogr.Info("Inside AfterEach ...", "waitingTime", time.Since(waitForAvailableStart))
 			gomega.Expect(util.DeleteLocalQueue(ctx, k8sClient, localQueue)).Should(gomega.Succeed())
 			gomega.Expect(util.DeleteAllJobsInNamespace(ctx, k8sClient, ns)).Should(gomega.Succeed())
 			util.ExpectClusterQueueToBeDeleted(ctx, k8sClient, clusterQueue, true)
 			util.ExpectResourceFlavorToBeDeleted(ctx, k8sClient, onDemandRF, true)
 			gomega.Eventually(func(g gomega.Gomega) {
+				ginkgo.GinkgoLogr.Info("Inside Eventually ...", "waitingTime", time.Since(waitForAvailableStart))
 				g.Expect(k8sClient.Delete(ctx, check)).Should(gomega.Succeed())
+				ginkgo.GinkgoLogr.Info("After Delete line", "waitingTime", time.Since(waitForAvailableStart))
 			}, util.StartUpTimeout, util.Interval).Should(gomega.Succeed())
+			ginkgo.GinkgoLogr.Info("Outside Eventually ...", "waitingTime", time.Since(waitForAvailableStart))
 		})
 
 		ginkgo.It("Should unsuspend a job only after all checks are cleared", func() {
