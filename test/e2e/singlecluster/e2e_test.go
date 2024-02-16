@@ -357,7 +357,9 @@ var _ = ginkgo.Describe("Kueue", func() {
 			gomega.Expect(util.DeleteAllJobsInNamespace(ctx, k8sClient, ns)).Should(gomega.Succeed())
 			util.ExpectClusterQueueToBeDeleted(ctx, k8sClient, clusterQueue, true)
 			util.ExpectResourceFlavorToBeDeleted(ctx, k8sClient, onDemandRF, true)
-			util.ExpectAdmissionCheckToBeDeleted(ctx, k8sClient, check, true)
+			gomega.Eventually(func(g gomega.Gomega) {
+				g.Expect(k8sClient.Delete(ctx, check)).Should(gomega.Succeed())
+			}, util.StartUpTimeout, util.Interval).Should(gomega.Succeed())
 		})
 
 		ginkgo.It("Should unsuspend a job only after all checks are cleared", func() {
