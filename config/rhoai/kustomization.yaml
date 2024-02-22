@@ -3,7 +3,8 @@
 # RHOAI configuration for Kueue.
 
 # Adds namespace to all resources.
-namespace: opendatahub
+# namespace: opendatahub
+namespace: openshift
 
 # Value of this field is prepended to the
 # names of all resources, e.g. a deployment named
